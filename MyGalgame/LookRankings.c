@@ -1,4 +1,4 @@
-#define _CRT_SECURE_NO_WARNINGS
+ï»¿#define _CRT_SECURE_NO_WARNINGS
 
 #include <SDL3/SDL.h>
 #include <SDL3_ttf/SDL_ttf.h>
@@ -9,10 +9,10 @@
 #include <string.h>
 
 
-//äÖÈ¾ÅÅĞĞ°ñ±êÌâ
+//æ¸²æŸ“æ’è¡Œæ¦œæ ‡é¢˜
 
 void renderRankingTitle(SDL_Renderer* renderer, TTF_Font* font, const char* text, float y) {
-    SDL_Color titleColor = { 100, 200, 255, 255 }; // À¶É«±êÌâ
+    SDL_Color titleColor = { 100, 200, 255, 255 }; // è“è‰²æ ‡é¢˜
 
     SDL_Surface* titleSurface = TTF_RenderText_Blended(font, text, 0, titleColor);
 
@@ -33,24 +33,24 @@ void renderRankingTitle(SDL_Renderer* renderer, TTF_Font* font, const char* text
     }
 }
 
-//äÖÈ¾ÅÅĞĞ°ñÌõÄ¿
-void renderRankingEntry(SDL_Renderer* renderer, TTF_Font* font,RankingEntry *entry, float y, bool isHovered) {
+//æ¸²æŸ“æ’è¡Œæ¦œæ¡ç›®
+void renderRankingEntry(SDL_Renderer* renderer, TTF_Font* font, RankingEntry* entry, float y, bool isHovered) {
     char EntryText[128];
 
-    // ¸ñÊ½»¯ÅÅĞĞ°ñÎÄ±¾£ºÅÅÃû. ĞÕÃû - ·ÖÊı
-    snprintf(EntryText, sizeof(EntryText), "%d.  %-20s  %d",entry->rank, entry->name, entry->score);
+    // æ ¼å¼åŒ–æ’è¡Œæ¦œæ–‡æœ¬ï¼šæ’å. å§“å - åˆ†æ•°
+    snprintf(EntryText, sizeof(EntryText), "%d.  %-20s  %d", entry->rank, entry->name, entry->score);
     SDL_Color TextColor;
     if (entry->rank == 1) {
-        TextColor = (SDL_Color){ 255, 215, 0, 255 }; // ½ğÉ«
+        TextColor = (SDL_Color){ 255, 215, 0, 255 }; // é‡‘è‰²
     }
     else if (entry->rank == 2) {
-        TextColor = (SDL_Color){ 192, 192, 192, 255 };//ÒøÉ«
+        TextColor = (SDL_Color){ 192, 192, 192, 255 };//é“¶è‰²
     }
     else if (entry->rank == 3) {
-        TextColor = (SDL_Color){ 205, 127, 50, 255 };//Í­É«
+        TextColor = (SDL_Color){ 205, 127, 50, 255 };//é“œè‰²
     }
     else {
-        TextColor = (SDL_Color){ 220, 220, 220, 255 };//°×É«
+        TextColor = (SDL_Color){ 220, 220, 220, 255 };//ç™½è‰²
     }
     if (isHovered) {
         SDL_FRect highlightRect = { WINDOW_WIDTH / 2 - 400,y - 5,800,50 };
@@ -69,12 +69,12 @@ void renderRankingEntry(SDL_Renderer* renderer, TTF_Font* font,RankingEntry *ent
             textRect.y = y;
             SDL_RenderTexture(renderer, textTexture, NULL, &textRect);
             SDL_DestroyTexture(textTexture);
-		}
+        }
     }
 }
 
 
-//äÖÈ¾±í¸ñ
+//æ¸²æŸ“è¡¨æ ¼
 
 void RenderHead(SDL_Renderer* renderer, TTF_Font* font, float y) {
     SDL_Color headerColor = { 150,150,150,255 };
@@ -90,8 +90,8 @@ void RenderHead(SDL_Renderer* renderer, TTF_Font* font, float y) {
             headerRect.y = y;
             SDL_RenderTexture(renderer, headerTexture, NULL, &headerRect);
             SDL_DestroyTexture(headerTexture);
-            
-            //·Ö¸îÏß
+
+            //åˆ†å‰²çº¿
             SDL_SetRenderDrawColor(renderer, 150, 150, 150, 255);
             SDL_RenderLine(renderer,
                 WINDOW_WIDTH / 2 - 400, y + headerRect.h + 5,
@@ -101,12 +101,12 @@ void RenderHead(SDL_Renderer* renderer, TTF_Font* font, float y) {
     }
 }
 
-//´ÓÎÄ¼ş¼ÓÔØÅÅĞĞ°ñÊı¾İ
+//ä»æ–‡ä»¶åŠ è½½æ’è¡Œæ¦œæ•°æ®
 
 int LoadData(RankingEntry* Rankings, int MaxEntries) {
     FILE* file = fopen("rankings.dat", "r");
     int count = 0;
-    //ÎÄ¼ş²»´æÔÚ
+    //æ–‡ä»¶ä¸å­˜åœ¨
     if (file == NULL) {
         SDL_Log("FileDoesNotExist");
         strcpy(Rankings[0].name, "Player1");
@@ -169,16 +169,16 @@ void LookRankings(SDL_Renderer* renderer, TTF_Font* TitleFont, TTF_Font* Normall
 
     Button backToMenuBtn = create_button(WINDOW_WIDTH / 2 - 150, WINDOW_HEIGHT - 120, 300, 60, "Back to Menu");
     /*
-    // ¹ö¶¯Ïà¹Ø±äÁ¿
+    // æ»šåŠ¨ç›¸å…³å˜é‡
     int scrollOffset = 0;
     int maxScroll = (cnt > 10) ? (cnt - 10) * 55 : 0;
-    int hoveredIndex = -1; // µ±Ç°Êó±êĞüÍ£µÄÅÅĞĞ°ñÌõÄ¿
+    int hoveredIndex = -1; // å½“å‰é¼ æ ‡æ‚¬åœçš„æ’è¡Œæ¦œæ¡ç›®
     */
 
     bool running = true;
     SDL_Event event;
     while (running) {
-        if (SDL_PollEvent(&event)) {//µ±Ç°ÓĞÊÂ¼ş·¢Éú
+        if (SDL_PollEvent(&event)) {//å½“å‰æœ‰äº‹ä»¶å‘ç”Ÿ
             if (event.type == SDL_EVENT_QUIT) {
                 running = false;
             }
@@ -209,13 +209,13 @@ void LookRankings(SDL_Renderer* renderer, TTF_Font* TitleFont, TTF_Font* Normall
                 backToMenuBtn.isPressed = false;
             }/*
             else if (event.type == SDL_EVENT_MOUSE_WHEEL) {
-                // Êó±ê¹öÂÖÖ§³Ö
+                // é¼ æ ‡æ»šè½®æ”¯æŒ
                 scrollOffset -= event.wheel.y * 30;
                 if (scrollOffset < 0) scrollOffset = 0;
                 if (scrollOffset > maxScroll) scrollOffset = maxScroll;
             }
             else if (event.type == SDL_EVENT_KEY_DOWN) {
-                // ¼üÅÌ¿ØÖÆ¹ö¶¯
+                // é”®ç›˜æ§åˆ¶æ»šåŠ¨
                 if (event.key.key == SDLK_UP) {
                     scrollOffset -= 55;
                     if (scrollOffset < 0) scrollOffset = 0;
@@ -229,15 +229,15 @@ void LookRankings(SDL_Renderer* renderer, TTF_Font* TitleFont, TTF_Font* Normall
                 }
              }*/
         }
-        //ËùÓĞÊÂ¼ş´¦ÀíÍê±Ï£¬¿ªÊ¼äÖÈ¾
-        //ÇåÆÁ
+        //æ‰€æœ‰äº‹ä»¶å¤„ç†å®Œæ¯•ï¼Œå¼€å§‹æ¸²æŸ“
+        //æ¸…å±
         SDL_SetRenderDrawColor(renderer, 20, 30, 40, 255);
         SDL_RenderClear(renderer);
-        //äÖÈ¾±êÌâ
+        //æ¸²æŸ“æ ‡é¢˜
         renderRankingTitle(renderer, TitleFont, "Rankings", 80);
-        //äÖÈ¾±í¸ñ
+        //æ¸²æŸ“è¡¨æ ¼
         RenderHead(renderer, NormallFont, 200);
-		//äÖÈ¾ÅÅĞĞ°ñÌõÄ¿
+        //æ¸²æŸ“æ’è¡Œæ¦œæ¡ç›®
         float startY = 280;
         for (int i = 0; i < cnt; i++) {
             float entryY = startY + i * 55;
@@ -250,10 +250,10 @@ void LookRankings(SDL_Renderer* renderer, TTF_Font* TitleFont, TTF_Font* Normall
             }
             renderRankingEntry(renderer, NormallFont, &entry[i], entryY, isHovered);
         }
-        //äÖÈ¾·µ»Ø°´Å¥
+        //æ¸²æŸ“è¿”å›æŒ‰é’®
         renderButton(renderer, &backToMenuBtn, SmallFont);
-        //¸üĞÂÆÁÄ»
-		SDL_RenderPresent(renderer);
-		SDL_Delay(16); // ´óÔ¼60 FPS
+        //æ›´æ–°å±å¹•
+        SDL_RenderPresent(renderer);
+        SDL_Delay(16); // å¤§çº¦60 FPS
     }
 }

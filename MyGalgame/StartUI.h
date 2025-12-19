@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #ifndef STARTUI_H
 #define STARTUI_H
 
@@ -6,6 +6,7 @@
 #include <SDL3_ttf/SDL_ttf.h>
 #include <stdbool.h>
 #include "inifunc.h"
+#include "gameOverUI.h"
 #define WINDOW_WIDTH 1920
 #define WINDOW_HEIGHT 1080
 
@@ -28,17 +29,17 @@ extern TTF_Font* titleFont;
 extern TTF_Font* buttonFont;
 extern TTF_Font* smallFont;
 
-// ³õÊ¼»¯ºÍÇåÀí
+// å ´å®è¶™ç¿ï’ç‡´
 bool initSDLsubsystem(void);
 void uninitSDLsubsystem(void);
 
-// °´Å¥Ïà¹Ø
+// åŒè½çœˆå£½
 Button create_button(float x, float y, float w, float h, const char* text);
 bool isPointInButton(Button* btn, float x, float y);
 void renderButton(SDL_Renderer* renderer, Button* btn, TTF_Font* font);
 
 
-// Ö÷½çÃæ
+// ç¿‹è³œé†±
 void StartUICreate(void);
 
 #endif // STARTUI_H

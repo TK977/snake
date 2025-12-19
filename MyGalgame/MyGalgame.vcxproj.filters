@@ -33,6 +33,12 @@
     <ClCompile Include="gameOverUI.c">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="Snake.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="GamePlay.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="inifunc.h">
@@ -45,6 +51,12 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="gameOverUI.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Snake.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="GamePlay.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

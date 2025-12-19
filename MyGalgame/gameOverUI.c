@@ -2,6 +2,7 @@
 #include <SDL3/SDL.h>
 #include <SDL3_ttf/SDL_ttf.h>
 #include "gameOverUI.h"
+#include <stdio.h>   // snprintf
 
 #define PANEL_WIDTH 800
 #define PANEL_HEIGHT 700
@@ -248,6 +249,7 @@ GameOverAction showGameOverUI(SDL_Renderer* renderer, TTF_Font* titleFont,
 						switch (i) {
 						case 0:
 							action = GAMEOVER_RESTART;
+							//StartSinglePlayer(renderer, smallFont);
 							running = false;
 							break;
 						case 1:

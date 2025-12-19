@@ -1,14 +1,15 @@
-//Ö÷ÒªÍê³É³õÊ¼Ò³ÃæµÄäÖÈ¾´´½¨
+ï»¿//ä¸»è¦å®Œæˆåˆå§‹é¡µé¢çš„æ¸²æŸ“åˆ›å»º
 #include <SDL3/SDL.h>
 #include <SDL3_ttf/SDL_ttf.h>
 #include <stdbool.h>
 #include "inifunc.h"
 #include "StartUI.h"
 #include "LookRankings.h"
+#include "GamePlay.h"
 
 
 
-//´´½¨°´Å¥º¯Êı
+//åˆ›å»ºæŒ‰é’®å‡½æ•°
 Button create_button(float x, float y, float w, float h, const char* text) {
     Button btn = {
         .rect = {x, y, w, h},
@@ -23,10 +24,10 @@ Button create_button(float x, float y, float w, float h, const char* text) {
     };
     return btn;
 }
-//ÅĞ¶ÏÊó±êÊÇ·ñÔÚ°´Å¥ÄÚº¯Êı
+//åˆ¤æ–­é¼ æ ‡æ˜¯å¦åœ¨æŒ‰é’®å†…å‡½æ•°
 bool isPointInButton(Button* btn, float x, float y) {
     if (!btn->isEnabled) {
-        //°´Å¥²»¿ÉÓÃ
+        //æŒ‰é’®ä¸å¯ç”¨
         return false;
     }
     else {
@@ -39,12 +40,12 @@ bool isPointInButton(Button* btn, float x, float y) {
         }
     }
 }
-//äÖÈ¾±êÌâº¯Êı
+//æ¸²æŸ“æ ‡é¢˜å‡½æ•°
 void renderTitle(SDL_Renderer* renderer, TTF_Font* font, const char* text, float y) {
     if (!font || !text) return;
-    SDL_Color titleColor = { 255, 215, 0, 255 }; // ½ğÉ«±êÌâ
+    SDL_Color titleColor = { 255, 215, 0, 255 }; // é‡‘è‰²æ ‡é¢˜
 
-    // ´´½¨ÎÄ±¾±íÃæ
+    // åˆ›å»ºæ–‡æœ¬è¡¨é¢
     SDL_Surface* titleSurface = TTF_RenderText_Blended(font, text, 0, titleColor);
 
     if (titleSurface) {
@@ -54,7 +55,7 @@ void renderTitle(SDL_Renderer* renderer, TTF_Font* font, const char* text, float
             SDL_FRect titleRect;
             titleRect.w = (float)titleSurface->w;
             titleRect.h = (float)titleSurface->h;
-            titleRect.x = (WINDOW_WIDTH - titleRect.w) / 2.0f; // ¾ÓÖĞ
+            titleRect.x = (WINDOW_WIDTH - titleRect.w) / 2.0f; // å±…ä¸­
             titleRect.y = y;
 
             SDL_RenderTexture(renderer, titleTexture, NULL, &titleRect);
@@ -64,26 +65,29 @@ void renderTitle(SDL_Renderer* renderer, TTF_Font* font, const char* text, float
     }
 }
 
-//äÖÈ¾°´Å¥º¯Êı
-void renderButton(SDL_Renderer* renderer, Button *btn, TTF_Font* font) {
+//æ¸²æŸ“æŒ‰é’®å‡½æ•°
+void renderButton(SDL_Renderer* renderer, Button* btn, TTF_Font* font) {
     if (!btn || !renderer) return;
 
     // Determine fill color
     SDL_Color fillColor;
     if (!btn->isEnabled) {
-        fillColor = (SDL_Color){60, 60, 60, 150};
-    } else if (btn->isPressed) {
+        fillColor = (SDL_Color){ 60, 60, 60, 150 };
+    }
+    else if (btn->isPressed) {
         fillColor = btn->pressedColor;
-    } else if (btn->isHovered) {
+    }
+    else if (btn->isHovered) {
         fillColor = btn->hoverColor;
-    } else {
+    }
+    else {
         fillColor = btn->normalColor;
     }
 
     SDL_SetRenderDrawColor(renderer, fillColor.r, fillColor.g, fillColor.b, fillColor.a);
     SDL_RenderFillRect(renderer, &btn->rect);
 
-    // »æÖÆ°´Å¥±ß¿ò
+    // ç»˜åˆ¶æŒ‰é’®è¾¹æ¡†
     if (btn->isHovered && btn->isEnabled) {
         SDL_SetRenderDrawColor(renderer, 150, 150, 200, 255);
     }
@@ -92,8 +96,8 @@ void renderButton(SDL_Renderer* renderer, Button *btn, TTF_Font* font) {
     }
     SDL_RenderRect(renderer, &btn->rect);
 
-    // äÖÈ¾°´Å¥ÎÄ±¾
-    SDL_Color textColor = btn->isEnabled ? btn->textColor : (SDL_Color){100,100,100,255};
+    // æ¸²æŸ“æŒ‰é’®æ–‡æœ¬
+    SDL_Color textColor = btn->isEnabled ? btn->textColor : (SDL_Color) { 100, 100, 100, 255 };
 
     if (font && btn->text) {
         SDL_Surface* textSurface = TTF_RenderText_Blended(font, btn->text, 0, textColor);
@@ -114,10 +118,10 @@ void renderButton(SDL_Renderer* renderer, Button *btn, TTF_Font* font) {
     }
 }
 
-void StartUICreate() {
+ void StartUICreate() {
     if (!initSDLsubsystem()) return;
 
-    //´´½¨´°¿Ú
+    //åˆ›å»ºçª—å£
     static SDL_Window* win = NULL;
     win = SDL_CreateWindow("The Snake", WINDOW_WIDTH, WINDOW_HEIGHT, SDL_WINDOW_RESIZABLE);
     if (win == NULL) {
@@ -126,7 +130,7 @@ void StartUICreate() {
         return;
     }
 
-    // ´´½¨äÖÈ¾Æ÷
+    // åˆ›å»ºæ¸²æŸ“å™¨
     SDL_Renderer* renderer = SDL_CreateRenderer(win, NULL);
     if (!renderer) {
         SDL_Log("Renderer Create Failed: %s", SDL_GetError());
@@ -138,12 +142,12 @@ void StartUICreate() {
     // enable blending
     SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
 
-    // ³¢ÊÔÒÔÏà¶ÔÂ·¾¶¼ÓÔØ×ÖÌå£¬Ê§°ÜÔò³¢ÊÔÏîÄ¿Â·¾¶
+    // å°è¯•ä»¥ç›¸å¯¹è·¯å¾„åŠ è½½å­—ä½“ï¼Œå¤±è´¥åˆ™å°è¯•é¡¹ç›®è·¯å¾„
     TTF_Font* titleFont = TTF_OpenFont("C:\\Users\\wtk\\Desktop\\MyGalgame\\x64\\Debug\\font.ttf", 96);
     TTF_Font* buttonFont = TTF_OpenFont("C:\\Users\\wtk\\Desktop\\MyGalgame\\x64\\Debug\\font.ttf", 28);
     TTF_Font* smallFont = TTF_OpenFont("C:\\Users\\wtk\\Desktop\\MyGalgame\\x64\\Debug\\font.ttf", 16);
     if (!titleFont || !buttonFont || !smallFont) {
-        // ³¢ÊÔ±¸ÓÃÂ·¾¶£¨ÏîÄ¿µ÷ÊÔÄ¿Â¼£©
+        // å°è¯•å¤‡ç”¨è·¯å¾„ï¼ˆé¡¹ç›®è°ƒè¯•ç›®å½•ï¼‰
         const char* fallback = "C:\\Users\\wtk\\Desktop\\MyGalgame\\x64\\Debug\\font.ttf";
         if (!titleFont) titleFont = TTF_OpenFont(fallback, 96);
         if (!buttonFont) buttonFont = TTF_OpenFont(fallback, 28);
@@ -166,7 +170,7 @@ void StartUICreate() {
     float buttonHeight = 60;
     float startY = 300;
     float spacing = 80;
-    //´´½¨5¸ö°´Å¥
+    //åˆ›å»º5ä¸ªæŒ‰é’®
     Button buttons[5];
     buttons[0] = create_button(centerX - buttonWidth / 2, startY + spacing * 0,
         buttonWidth, buttonHeight, "Single Mode");
@@ -179,49 +183,51 @@ void StartUICreate() {
     buttons[4] = create_button(centerX - buttonWidth / 2, startY + spacing * 4,
         buttonWidth, buttonHeight, "Exit");
 
-    // ´°¿Ú±£³Ö,µÈ´ıÓÃ»§¹Ø±Õ
+    // çª—å£ä¿æŒ,ç­‰å¾…ç”¨æˆ·å…³é—­
     bool flag = true;
-    SDL_Event event; //ÊÂ¼ş¼àÌı
+    SDL_Event event; //äº‹ä»¶ç›‘å¬
     while (flag) {
         if (SDL_WaitEvent(&event)) {
             if (event.type == SDL_EVENT_QUIT) {
                 break;
             }
-            else if(event.type == SDL_EVENT_MOUSE_MOTION){
-                //»ñÈ¡Êó±ê×ø±ê
+            else if (event.type == SDL_EVENT_MOUSE_MOTION) {
+                //è·å–é¼ æ ‡åæ ‡
                 float mouseX = event.motion.x;
                 float mouseY = event.motion.y;
                 for (int i = 0; i < 5; i++) {
                     buttons[i].isHovered = isPointInButton(&buttons[i], mouseX, mouseY);
                 }
             }
-            //´¦ÀíÊó±ê°´ÏÂµÄÇé¿ö
+            //å¤„ç†é¼ æ ‡æŒ‰ä¸‹çš„æƒ…å†µ
             else if (event.type == SDL_EVENT_MOUSE_BUTTON_DOWN) {
                 float mouseX = event.button.x;
                 float mouseY = event.button.y;
                 for (int i = 0; i < 5; i++) {
                     if (isPointInButton(&buttons[i], mouseX, mouseY)) {
                         buttons[i].isPressed = true;
-                        //Õâ¸öÎ»ÖÃÒªÓĞ½Ó¿Ú£¬¿ªÊ¼ÓÎÏ·Òª½øÈëÓÎÏ·½çÃæ
+                        //è¿™ä¸ªä½ç½®è¦æœ‰æ¥å£ï¼Œå¼€å§‹æ¸¸æˆè¦è¿›å…¥æ¸¸æˆç•Œé¢
                         switch (i) {
-                            case 0:
-                                SDL_Log("Single Mode");
-                                break;
-                            case 1:
-                                SDL_Log("Muti Mode");
-                                break;
-                            case 2:
-                                SDL_Log("Rankings");
-                                LookRankings(renderer,titleFont,buttonFont,smallFont);
-								buttons[2].isPressed = false; // ·µ»ØºóÖØÖÃ°´Å¥×´Ì¬
-                                break;
-                            case 3:
-                                SDL_Log("Settings");
-                                break;
-                            case 4:
-                                SDL_Log("Exit");
-                                flag = false;
-                                break;
+                        case 0:
+                            SDL_Log("Single Mode");
+                            StartSinglePlayer(renderer, smallFont);
+                            break;
+                        case 1:
+                            SDL_Log("Muti Mode");
+                            StartMultiPlayer(renderer, smallFont);
+                            break;
+                        case 2:
+                            SDL_Log("Rankings");
+                            LookRankings(renderer, titleFont, buttonFont, smallFont);
+                            buttons[2].isPressed = false; // è¿”å›åé‡ç½®æŒ‰é’®çŠ¶æ€
+                            break;
+                        case 3:
+                            SDL_Log("Settings");
+                            break;
+                        case 4:
+                            SDL_Log("Exit");
+                            flag = false;
+                            break;
                         }
                     }
                 }
@@ -233,24 +239,24 @@ void StartUICreate() {
             }
         }
 
-        // ÇåÀí±³¾°
+        // æ¸…ç†èƒŒæ™¯
         SDL_SetRenderDrawColor(renderer, 20, 20, 20, 255);
         SDL_RenderClear(renderer);
 
-        //äÖÈ¾±êÌâ
+        //æ¸²æŸ“æ ‡é¢˜
         if (titleFont) {
             renderTitle(renderer, titleFont, "The Snake", 100);
         }
-        //äÖÈ¾°´Å¥
+        //æ¸²æŸ“æŒ‰é’®
         for (int i = 0; i < 5; i++) {
             renderButton(renderer, &buttons[i], buttonFont);
         }
         SDL_RenderPresent(renderer);
 
-        SDL_Delay(16); // Ô¼60 FPS
+        SDL_Delay(16); // çº¦60 FPS
     }
 
-    // ÇåÀí×ÖÌåÓëäÖÈ¾Æ÷
+    // æ¸…ç†å­—ä½“ä¸æ¸²æŸ“å™¨
     TTF_CloseFont(titleFont);
     TTF_CloseFont(buttonFont);
     TTF_CloseFont(smallFont);

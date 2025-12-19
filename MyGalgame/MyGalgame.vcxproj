@@ -129,16 +129,20 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="gameOverUI.c" />
+    <ClCompile Include="GamePlay.c" />
     <ClCompile Include="inifunc.c" />
     <ClCompile Include="LookRankings.c" />
     <ClCompile Include="main.c" />
+    <ClCompile Include="Snake.c" />
     <ClCompile Include="StartUI.c" />
     <ClCompile Include="Tst.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="gameOverUI.h" />
+    <ClInclude Include="GamePlay.h" />
     <ClInclude Include="inifunc.h" />
     <ClInclude Include="LookRankings.h" />
+    <ClInclude Include="Snake.h" />
     <ClInclude Include="StartUI.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
