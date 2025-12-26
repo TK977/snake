@@ -1,11 +1,41 @@
-﻿#include "GamePlay.h"
+﻿#define _CRT_SECURE_NO_WARNINGS   // 必须放在任何 #include 之前
+#include <stdio.h>                // 现在 strcpy 不再报错
+#include "GamePlay.h"
 #include "Snake.h"
 #include "StartUI.h"
 #include "gameOverUI.h"
 #include <stdlib.h>
 #include <time.h>
-#define _CRT_SECURE_NO_WARNINGS
-#include <stdio.h>   // snprintf
+#include "MultiGameOverUI.h"
+#include "Data.h"
+#include "Settings.h"
+
+// 真·圆角矩形（SDL3 自带，半径可改）
+// 纯软件圆角：手动画 4 个实心圆 + 十字
+static void RenderRoundRect(SDL_Renderer* r, const SDL_FRect* rect, SDL_Color c)
+{
+    SDL_SetRenderDrawColor(r, c.r, c.g, c.b, c.a);
+
+    /* 1. 十字主体 */
+    SDL_FRect core;
+    core = (SDL_FRect){ rect->x + 6, rect->y, rect->w - 12, rect->h };
+    SDL_RenderFillRect(r, &core);
+    core = (SDL_FRect){ rect->x, rect->y + 6, rect->w, rect->h - 12 };
+    SDL_RenderFillRect(r, &core);
+
+    /* 2. 四个角画实心圆（半径 6） */
+    float rad = 6.f;
+    int   steps = 12;
+    for (int i = 0; i < 4; ++i) {
+        float cx = rect->x + (i & 1 ? rect->w - rad : rad);
+        float cy = rect->y + (i >> 1 ? rect->h - rad : rad);
+        for (int j = 0; j < steps; ++j) {
+            float a = (float)j / steps * 2.f * 3.1415926f;
+            SDL_FRect p = { cx + cosf(a) * rad, cy + sinf(a) * rad, 1.f, 1.f };
+            SDL_RenderFillRect(r, &p);
+        }
+    }
+}
 
 /* 检测蛇头是否碰到另一条蛇的身体 */
 static bool HitOtherSnake(const Snake* me, const Snake* other)
@@ -48,9 +78,22 @@ static void drawGame(SDL_Renderer* renderer, const Snake* s, const Food* f, TTF_
     SDL_FRect border = { 0,0, GRID_W * CELL, GRID_H * CELL };
     SDL_RenderRect(renderer, &border);
 
-    for (Node* cur = s->head; cur; cur = cur->next) {
+    /* ===== 蛇头：圆角 ===== */
+    Node* cur = s->head;
+    SDL_FRect headR = { cur->x * CELL, cur->y * CELL, CELL, CELL };
+    SDL_Color headColor = id == 1
+        ? currentSettings.snakeColor
+        : (SDL_Color) { 100, 255, 255, 255 };
+    RenderRoundRect(renderer, &headR, headColor);
+
+    /* ===== 身子：普通方块 ===== */
+    for (cur = cur->next; cur; cur = cur->next) {
         SDL_FRect r = { cur->x * CELL, cur->y * CELL, CELL, CELL };
-        SDL_SetRenderDrawColor(renderer, id == 1 ? 0 : 100, 255, id == 1 ? 100 : 255, 255);
+        SDL_SetRenderDrawColor(renderer,
+            id == 1 ? currentSettings.snakeColor.r : 100,
+            id == 1 ? currentSettings.snakeColor.g : 255,
+            id == 1 ? currentSettings.snakeColor.b : 255,
+            255);
         SDL_RenderFillRect(renderer, &r);
     }
     SDL_FRect rf = { f->x * CELL, f->y * CELL, CELL, CELL };
@@ -115,14 +158,21 @@ void StartSinglePlayer(SDL_Renderer* renderer, TTF_Font* smallFont) {
     data.timeElapsed = SDL_GetTicks() / 1000;
     data.isNewHighScore = score > high;
     data.reason = GAME_OVER_SELF_COLLISION;
+
+    // Save Score
+    SaveRanking(currentSettings.nickname, score);
+
     showGameOverUI(renderer, NULL, smallFont, smallFont, &data);
     Snake_Destroy(s);
 }
 
-void StartMultiPlayer(SDL_Renderer* renderer, TTF_Font* smallFont) {
+GameOverAction StartMultiPlayer(SDL_Renderer* renderer,
+    TTF_Font* titleFont,
+    TTF_Font* buttonFont,
+    TTF_Font* smallFont) {
     srand((unsigned)time(NULL));
-    Snake* s1 = Snake_Create(10, GRID_H / 2-10);
-    Snake* s2 = Snake_Create(GRID_W - 10, GRID_H / 2 +10);
+    Snake* s1 = Snake_Create(10, GRID_H / 2 - 10);
+    Snake* s2 = Snake_Create(GRID_W - 10, GRID_H / 2 + 10);
     s2->head->next->x = GRID_W - 9;   // 第二节右移 1
     s2->head->next->y = GRID_H / 2 + 10;
     s2->head->next->next->x = GRID_W - 8; // 第三节再右移 1
@@ -133,9 +183,37 @@ void StartMultiPlayer(SDL_Renderer* renderer, TTF_Font* smallFont) {
     int sc1 = 0, sc2 = 0;
     Uint32 last = SDL_GetTicks(), spd = 120;
     bool run = true;
+    Uint32 gameStart = SDL_GetTicks();          // 记录开局时间
+    const Uint32 TIME_LIMIT_MS = 2 * 60 * 1000; // 2 分钟
+    bool d1 = false, d2 = false;
+    /* ---- 双人结算数据结构（占位，后续填真实数据）---- */
+    MultiPlayerGameOverData mpData = { 0 };
+    mpData.reason = MP_GAME_OVER_DRAW;   // 临时，后面按胜负改
+    mpData.totalTime = 0;                   // 后面给真实秒数
+    mpData.level = 1;                   // 后面给真实等级
+    strcpy(mpData.player1.name, "P1");
+    strcpy(mpData.player2.name, "P2");
+    mpData.player1.color = (SDL_Color){ 100, 200, 255, 255 };
+    mpData.player2.color = (SDL_Color){ 255, 100, 100, 255 };
+    mpData.player1.score = sc1;   // 当前就有，先放上
+    mpData.player2.score = sc2;
+    mpData.player1.length = 3;     // 后面给真实长度
+    mpData.player2.length = 3;
+    mpData.player1.kills = 0;     // 后面给真实击杀
+    mpData.player2.kills = 0;
+    mpData.player1.isAlive = true;  // 后面按真实存活
+    mpData.player2.isAlive = true;
+    mpData.player1.isWinner = false; // 后面按胜负改
+    mpData.player2.isWinner = false;
 
     while (run) {
-		//printf(">>>shaungren\n");//调试
+        Uint32 now = SDL_GetTicks();
+        Uint32 elapsed = now - gameStart;
+        if (elapsed >= TIME_LIMIT_MS) {   // 时间到
+            run = false;
+            break;
+        }
+        //printf(">>>shaungren\n");//调试
         SDL_Event e;
         while (SDL_PollEvent(&e)) {
             if (e.type == SDL_EVENT_QUIT) { run = false; break; }
@@ -152,7 +230,7 @@ void StartMultiPlayer(SDL_Renderer* renderer, TTF_Font* smallFont) {
                 }
             }
         }
-        Uint32 now = SDL_GetTicks();
+       
         if (now - last < spd) { SDL_Delay(1); continue; }
         last = now;
 
@@ -163,8 +241,8 @@ void StartMultiPlayer(SDL_Renderer* renderer, TTF_Font* smallFont) {
         /* ---- 明细死亡检测 ---- */
         bool wall1 = Snake_WallCollision(s1), self1 = Snake_SelfCollision(s1), hit1 = HitOtherSnake(s1, s2);
         bool wall2 = Snake_WallCollision(s2), self2 = Snake_SelfCollision(s2), hit2 = HitOtherSnake(s2, s1);
-        bool d1 = wall1 || self1 || hit1;
-        bool d2 = wall2 || self2 || hit2;
+        d1 = wall1 || self1 || hit1;
+        d2 = wall2 || self2 || hit2;
 
         if (d1 || d2) {
             printf("=== DEATH d1=%d(w%d|s%d|h%d) d2=%d(w%d|s%d|h%d)\n",
@@ -184,12 +262,22 @@ void StartMultiPlayer(SDL_Renderer* renderer, TTF_Font* smallFont) {
         SDL_FRect border = { 0,0, GRID_W * CELL, GRID_H * CELL };
         SDL_RenderRect(renderer, &border);
 
-        for (Node* cur = s1->head; cur; cur = cur->next) {
+        /* ===== P1 蛇头圆角 ===== */
+        Node* cur = s1->head;
+        SDL_FRect headR1 = { cur->x * CELL, cur->y * CELL, CELL, CELL };
+        RenderRoundRect(renderer, &headR1, (SDL_Color) { 0, 255, 100, 255 });
+        /* ===== P1 身子方块 ===== */
+        for (cur = cur->next; cur; cur = cur->next) {
             SDL_FRect r = { cur->x * CELL, cur->y * CELL, CELL, CELL };
             SDL_SetRenderDrawColor(renderer, 0, 255, 100, 255);
             SDL_RenderFillRect(renderer, &r);
         }
-        for (Node* cur = s2->head; cur; cur = cur->next) {
+        /* ===== P2 蛇头圆角 ===== */
+        cur = s2->head;
+        SDL_FRect headR2 = { cur->x * CELL, cur->y * CELL, CELL, CELL };
+        RenderRoundRect(renderer, &headR2, (SDL_Color) { 100, 150, 255, 255 });
+        /* ===== P2 身子方块 ===== */
+        for (cur = cur->next; cur; cur = cur->next) {
             SDL_FRect r = { cur->x * CELL, cur->y * CELL, CELL, CELL };
             SDL_SetRenderDrawColor(renderer, 100, 150, 255, 255);
             SDL_RenderFillRect(renderer, &r);
@@ -218,7 +306,43 @@ void StartMultiPlayer(SDL_Renderer* renderer, TTF_Font* smallFont) {
     data.timeElapsed = SDL_GetTicks() / 1000;
     data.isNewHighScore = false;
     data.reason = GAME_OVER_SELF_COLLISION;
-    showGameOverUI(renderer, NULL, smallFont, smallFont, &data);
-    Snake_Destroy(s1);
-    Snake_Destroy(s2);
+    /* ========== 统一胜负 & 存活 & 时间 ========== */
+    mpData.totalTime = (SDL_GetTicks() - gameStart) / 1000;  // 真实秒数
+    mpData.player1.isAlive = !d1;
+    mpData.player2.isAlive = !d2;
+
+    if (d1 && !d2) {                 // P1 死，P2 活
+        mpData.reason = MP_GAME_OVER_PLAYER2_WIN;
+        mpData.player2.isWinner = true;
+    }
+    else if (!d1 && d2) {            // P2 死，P1 活
+        mpData.reason = MP_GAME_OVER_PLAYER1_WIN;
+        mpData.player1.isWinner = true;
+    }
+    else if (sc1 > sc2) {            // 都活或都死，但积分高者胜
+        mpData.reason = MP_GAME_OVER_PLAYER1_WIN;
+        mpData.player1.isWinner = true;
+    }
+    else if (sc2 > sc1) {
+        mpData.reason = MP_GAME_OVER_PLAYER2_WIN;
+        mpData.player2.isWinner = true;
+    }
+    else {                           // 积分相同
+        mpData.reason = MP_GAME_OVER_DRAW;
+    }
+    /* ---- 弹出双人结算界面 ---- */
+    MultiPlayerGameOverAction mpAct =
+        showMultiPlayerGameOverUI(renderer, titleFont, buttonFont, smallFont, &mpData);
+
+    /* 把新枚举映射回旧枚举，让外层循环继续通用 */
+    GameOverAction act;
+    switch (mpAct) {
+    case MP_GAMEOVER_REMATCH: act = GAMEOVER_RESTART; break;
+    case MP_GAMEOVER_MENU:    act = GAMEOVER_MENU;    break;
+    case MP_GAMEOVER_EXIT:    act = GAMEOVER_EXIT;    break;
+    default:                  act = GAMEOVER_MENU;    break;
+    }
+	Snake_Destroy(s1);
+	Snake_Destroy(s2);
+    return act;
 }

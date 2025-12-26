@@ -1,9 +1,5 @@
 #pragma once
-typedef struct {
-	char name[20];
-	float score;
-	int rank;
-}RankingEntry;
+#include "GameTypes.h"
 
 
 void renderRankingTitle(SDL_Renderer* renderer, TTF_Font* font, const char* text, float y);

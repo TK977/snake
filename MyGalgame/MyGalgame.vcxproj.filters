@@ -39,6 +39,21 @@
     <ClCompile Include="GamePlay.c">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="MultiGameOverUI.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Data.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Settings.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="SettingsUI.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Audio.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="inifunc.h">
@@ -59,5 +74,25 @@
     <ClInclude Include="GamePlay.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="MultiGameOverUI.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Data.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Settings.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="SettingsUI.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Audio.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Media Include="music.wav">
+      <Filter>资源文件</Filter>
+    </Media>
   </ItemGroup>
 </Project>

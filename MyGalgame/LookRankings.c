@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include "LookRankings.h"
 #include <string.h>
+#include "Data.h"
 
 
 //渲染排行榜标题
@@ -103,10 +104,11 @@ void RenderHead(SDL_Renderer* renderer, TTF_Font* font, float y) {
 
 //从文件加载排行榜数据
 
+//从文件加载排行榜数据
 int LoadData(RankingEntry* Rankings, int MaxEntries) {
     int cnt = LoadRankings(Rankings, MaxEntries);
     if (cnt == 0) {
-        // Defaults if no file
+		// 如果文件不存在或为空，使用默认数据
         strcpy(Rankings[0].name, "Player1"); Rankings[0].score = 1000; Rankings[0].rank = 1;
         strcpy(Rankings[1].name, "Player2"); Rankings[1].score = 850; Rankings[1].rank = 2;
         strcpy(Rankings[2].name, "Player3"); Rankings[2].score = 720; Rankings[2].rank = 3;

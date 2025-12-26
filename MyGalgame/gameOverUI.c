@@ -4,6 +4,7 @@
 #include "gameOverUI.h"
 #include <stdio.h>   // snprintf
 
+
 #define PANEL_WIDTH 800
 #define PANEL_HEIGHT 700
 
@@ -137,6 +138,10 @@ void renderGameOverStats(SDL_Renderer* renderer, TTF_Font* font, GameOverData* d
 	int lineHeight = 50;
 	char buffer[128];
 
+	if (data->finalScore > data->highScore) {
+		data->isNewHighScore = true;
+	}
+
 	if (data->isNewHighScore) {
 		renderNewHighScoreAnima(renderer, font, centerX,
 			statsY - 60, SDL_GetTicks());
@@ -249,7 +254,7 @@ GameOverAction showGameOverUI(SDL_Renderer* renderer, TTF_Font* titleFont,
 						switch (i) {
 						case 0:
 							action = GAMEOVER_RESTART;
-							//StartSinglePlayer(renderer, smallFont);
+							StartSinglePlayer(renderer, smallFont);
 							running = false;
 							break;
 						case 1:

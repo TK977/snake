@@ -1,4 +1,5 @@
 ﻿#include "StartUI.h"
+#include "Settings.h"
 #include <locale.h>
 
 #ifdef _WIN32
@@ -17,6 +18,9 @@ int main(int argc, char* argv[]) {
     if (!initSDLsubsystem()) {
         return 1;
     }
+    // Initialize Settings
+    InitSettings();
+
     // 运行启动界面
     StartUICreate();
 

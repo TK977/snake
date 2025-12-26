@@ -71,8 +71,8 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>C:\Users\wtk\Desktop\MyGalgame\SDL3-3.2.28\include;C:\Users\wtk\Desktop\MyGalgame\SDL3_ttf-3.2.2\include;C:\Users\wtk\Desktop\MyGalgame\SDL3_image-3.2.4\include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Users\wtk\Desktop\MyGalgame\SDL3-3.2.28\lib\x64;C:\Users\wtk\Desktop\MyGalgame\SDL3_ttf-3.2.2\lib\x64;C:\Users\wtk\Desktop\MyGalgame\SDL3_image-3.2.4\lib\x64;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\snakegamep\MyGalgame\SDL3-3.2.28\include;C:\snakegamep\MyGalgame\SDL3_ttf-3.2.2\include;C:\snakegamep\MyGalgame\SDL3_image-3.2.4\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\snakegamep\MyGalgame\SDL3_image-3.2.4\lib\x64;C:\snakegamep\MyGalgame\SDL3_ttf-3.2.2\lib\x64;C:\snakegamep\MyGalgame\SDL3-3.2.28\lib\x64;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -112,6 +112,9 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>SDL3.lib;SDL3_test.lib;SDL3_ttf.lib;SDL3_image.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>copy /Y "$(ProjectDir)music.wav" "$(OutDir)"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -128,22 +131,35 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Audio.c" />
     <ClCompile Include="gameOverUI.c" />
+    <ClCompile Include="Data.c" />
     <ClCompile Include="GamePlay.c" />
     <ClCompile Include="inifunc.c" />
     <ClCompile Include="LookRankings.c" />
     <ClCompile Include="main.c" />
+    <ClCompile Include="MultiGameOverUI.c" />
+    <ClCompile Include="Settings.c" />
+    <ClCompile Include="SettingsUI.c" />
     <ClCompile Include="Snake.c" />
     <ClCompile Include="StartUI.c" />
     <ClCompile Include="Tst.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Audio.h" />
     <ClInclude Include="gameOverUI.h" />
+    <ClInclude Include="Data.h" />
     <ClInclude Include="GamePlay.h" />
     <ClInclude Include="inifunc.h" />
     <ClInclude Include="LookRankings.h" />
+    <ClInclude Include="MultiGameOverUI.h" />
     <ClInclude Include="Snake.h" />
+    <ClInclude Include="Settings.h" />
+    <ClInclude Include="SettingsUI.h" />
     <ClInclude Include="StartUI.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Media Include="music.wav" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

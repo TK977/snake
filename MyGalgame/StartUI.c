@@ -6,8 +6,12 @@
 #include "StartUI.h"
 #include "LookRankings.h"
 #include "GamePlay.h"
+#include "SettingsUI.h"
 
 
+
+
+SDL_Window* win = NULL;
 
 //创建按钮函数
 Button create_button(float x, float y, float w, float h, const char* text) {
@@ -122,7 +126,7 @@ void renderButton(SDL_Renderer* renderer, Button* btn, TTF_Font* font) {
     if (!initSDLsubsystem()) return;
 
     //创建窗口
-    static SDL_Window* win = NULL;
+    //SDL_Window* win = NULL;
     win = SDL_CreateWindow("The Snake", WINDOW_WIDTH, WINDOW_HEIGHT, SDL_WINDOW_RESIZABLE);
     if (win == NULL) {
         SDL_Log("SDL_CreateWindow Error: %s", SDL_GetError());
@@ -143,9 +147,9 @@ void renderButton(SDL_Renderer* renderer, Button* btn, TTF_Font* font) {
     SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
 
     // 尝试以相对路径加载字体，失败则尝试项目路径
-    TTF_Font* titleFont = TTF_OpenFont("C:\\Users\\wtk\\Desktop\\MyGalgame\\x64\\Debug\\font.ttf", 96);
-    TTF_Font* buttonFont = TTF_OpenFont("C:\\Users\\wtk\\Desktop\\MyGalgame\\x64\\Debug\\font.ttf", 28);
-    TTF_Font* smallFont = TTF_OpenFont("C:\\Users\\wtk\\Desktop\\MyGalgame\\x64\\Debug\\font.ttf", 16);
+    TTF_Font* titleFont = TTF_OpenFont("C:\\snakegamep\\MyGalgame\\x64\\Debug\\font.ttf", 96);
+    TTF_Font* buttonFont = TTF_OpenFont("C:\\snakegamep\\MyGalgame\\x64\\Debug\\font.ttf", 28);
+    TTF_Font* smallFont = TTF_OpenFont("C:\\snakegamep\\MyGalgame\\x64\\Debug\\font.ttf", 16);
     if (!titleFont || !buttonFont || !smallFont) {
         // 尝试备用路径（项目调试目录）
         const char* fallback = "C:\\Users\\wtk\\Desktop\\MyGalgame\\x64\\Debug\\font.ttf";
@@ -208,14 +212,22 @@ void renderButton(SDL_Renderer* renderer, Button* btn, TTF_Font* font) {
                         buttons[i].isPressed = true;
                         //这个位置要有接口，开始游戏要进入游戏界面
                         switch (i) {
-                        case 0:
-                            SDL_Log("Single Mode");
-                            StartSinglePlayer(renderer, smallFont);
+                        case 0: {   // 单人——支持 Restart
+                            do {
+                                StartSinglePlayer(renderer, smallFont);
+                                /* 后续把 StartSinglePlayer 改成返回 GameOverAction 即可重开 */
+                            } while (false);   // 只玩一次，先不循环
+                            buttons[0].isPressed = false;
                             break;
-                        case 1:
-                            SDL_Log("Muti Mode");
-                            StartMultiPlayer(renderer, smallFont);
+                        }
+                        case 1: {   // 双人——支持 Restart
+                            GameOverAction act;
+                            do {
+                                act = StartMultiPlayer(renderer, titleFont, buttonFont, smallFont);
+                            } while (act == GAMEOVER_RESTART);
+                            buttons[1].isPressed = false;
                             break;
+                        }
                         case 2:
                             SDL_Log("Rankings");
                             LookRankings(renderer, titleFont, buttonFont, smallFont);
@@ -223,6 +235,8 @@ void renderButton(SDL_Renderer* renderer, Button* btn, TTF_Font* font) {
                             break;
                         case 3:
                             SDL_Log("Settings");
+                            ShowSettingsUI(renderer, titleFont, buttonFont, smallFont);
+                            buttons[3].isPressed = false;
                             break;
                         case 4:
                             SDL_Log("Exit");
