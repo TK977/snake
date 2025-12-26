@@ -104,63 +104,22 @@ void RenderHead(SDL_Renderer* renderer, TTF_Font* font, float y) {
 //从文件加载排行榜数据
 
 int LoadData(RankingEntry* Rankings, int MaxEntries) {
-    FILE* file = fopen("rankings.dat", "r");
-    int count = 0;
-    //文件不存在
-    if (file == NULL) {
-        SDL_Log("FileDoesNotExist");
-        strcpy(Rankings[0].name, "Player1");
-        Rankings[0].score = 1000;
-        Rankings[0].rank = 1;
-
-        strcpy(Rankings[1].name, "Player2");
-        Rankings[1].score = 850;
-        Rankings[1].rank = 2;
-
-        strcpy(Rankings[2].name, "Player3");
-        Rankings[2].score = 720;
-        Rankings[2].rank = 3;
-
-        strcpy(Rankings[3].name, "Player4");
-        Rankings[3].score = 650;
-        Rankings[3].rank = 4;
-
-        strcpy(Rankings[4].name, "Player5");
-        Rankings[4].score = 580;
-        Rankings[4].rank = 5;
-
-        strcpy(Rankings[5].name, "Player6");
-        Rankings[5].score = 500;
-        Rankings[5].rank = 6;
-
-        strcpy(Rankings[6].name, "Player7");
-        Rankings[6].score = 420;
-        Rankings[6].rank = 7;
-
-        strcpy(Rankings[7].name, "Player8");
-        Rankings[7].score = 350;
-        Rankings[7].rank = 8;
-
-        strcpy(Rankings[8].name, "Player9");
-        Rankings[8].score = 280;
-        Rankings[8].rank = 9;
-
-        strcpy(Rankings[9].name, "Player10");
-        Rankings[9].score = 200;
-        Rankings[9].rank = 10;
-
+    int cnt = LoadRankings(Rankings, MaxEntries);
+    if (cnt == 0) {
+        // Defaults if no file
+        strcpy(Rankings[0].name, "Player1"); Rankings[0].score = 1000; Rankings[0].rank = 1;
+        strcpy(Rankings[1].name, "Player2"); Rankings[1].score = 850; Rankings[1].rank = 2;
+        strcpy(Rankings[2].name, "Player3"); Rankings[2].score = 720; Rankings[2].rank = 3;
+        strcpy(Rankings[3].name, "Player4"); Rankings[3].score = 650; Rankings[3].rank = 4;
+        strcpy(Rankings[4].name, "Player5"); Rankings[4].score = 580; Rankings[4].rank = 5;
+        strcpy(Rankings[5].name, "Player6"); Rankings[5].score = 500; Rankings[5].rank = 6;
+        strcpy(Rankings[6].name, "Player7"); Rankings[6].score = 420; Rankings[6].rank = 7;
+        strcpy(Rankings[7].name, "Player8"); Rankings[7].score = 350; Rankings[7].rank = 8;
+        strcpy(Rankings[8].name, "Player9"); Rankings[8].score = 280; Rankings[8].rank = 9;
+        strcpy(Rankings[9].name, "Player10"); Rankings[9].score = 200; Rankings[9].rank = 10;
         return 10;
     }
-    else {
-        while (count < MaxEntries && fscanf(file, "%d %s %d",
-            &Rankings[count].rank,
-            Rankings[count].name,
-            &Rankings[count].score) == 3) {
-            count++;
-        }
-    }
-    fclose(file);
-    return count;
+    return cnt;
 }
 
 void LookRankings(SDL_Renderer* renderer, TTF_Font* TitleFont, TTF_Font* NormallFont, TTF_Font* SmallFont) {
