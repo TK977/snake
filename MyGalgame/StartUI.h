@@ -1,4 +1,9 @@
-﻿#pragma once
+﻿/**
+ * StartUI.h
+ * 主菜单对外接口及全局声明
+ */
+
+#pragma once
 #ifndef STARTUI_H
 #define STARTUI_H
 
@@ -7,39 +12,36 @@
 #include <stdbool.h>
 #include "inifunc.h"
 #include "gameOverUI.h"
-#define WINDOW_WIDTH 1920
+
+ /* 窗口常量 */
+#define WINDOW_WIDTH  1920
 #define WINDOW_HEIGHT 1080
 
-
+/* 按钮结构体 */
 typedef struct {
-    SDL_FRect rect;
-    const char* text;
-    SDL_Color textColor;
-    SDL_Color normalColor;
-    SDL_Color hoverColor;
-    SDL_Color pressedColor;
+    SDL_FRect rect;                 // 矩形区域
+    const char* text;               // 文字
+    SDL_Color textColor;            // 文字颜色
+    SDL_Color normalColor;          // 正常背景
+    SDL_Color hoverColor;           // 悬停背景
+    SDL_Color pressedColor;         // 按下背景
     bool isHovered;
     bool isPressed;
-    bool isEnabled;
+    bool isEnabled;                 // 是否可用
 } Button;
 
+/* 全局窗口句柄，供设置界面使用 */
 extern SDL_Window* win;
-extern SDL_Renderer* renderer;
-extern TTF_Font* titleFont;
-extern TTF_Font* buttonFont;
-extern TTF_Font* smallFont;
 
-// 場宎趙睿燴
+/* 函数声明 */
 bool initSDLsubsystem(void);
 void uninitSDLsubsystem(void);
 
-// 偌聽眈壽
 Button create_button(float x, float y, float w, float h, const char* text);
 bool isPointInButton(Button* btn, float x, float y);
 void renderButton(SDL_Renderer* renderer, Button* btn, TTF_Font* font);
 
-
-// 翋賜醱
+/* 主菜单入口 */
 void StartUICreate(void);
 
 #endif // STARTUI_H
