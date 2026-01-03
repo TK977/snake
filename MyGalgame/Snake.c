@@ -11,9 +11,10 @@
   */
 static Node* newNode(int x, int y)
 {
-    Node* n = (Node*)malloc(sizeof(Node));
-    n->x = x; n->y = y; n->next = NULL;
-    return n;
+    Node* n = (Node*)malloc(sizeof(Node));// 申请内存
+    n->x = x; 
+    n->y = y;                              // 存坐标
+    n->next = NULL;                 // 后面还没接东西
 }
 
 /**
@@ -24,11 +25,11 @@ static Node* newNode(int x, int y)
  */
 Snake* Snake_Create(int startX, int startY)
 {
-    Snake* s = (Snake*)malloc(sizeof(Snake));
-    s->head = newNode(startX, startY);
-    s->dir = DIR_RIGHT;
-    s->growPending = false; // 暂无成长请求
-    /* 第二节、第三节向左延伸 */
+    Snake* s = (Snake*)malloc(sizeof(Snake));    // 蛇对象本身
+    s->head = newNode(startX, startY);  // 第一节=蛇头
+    s->dir = DIR_RIGHT;             // 默认向右
+    s->growPending = false; // 没吃到食物
+    // 再串两节到左边，形成“头→身→尾”
     s->head->next = newNode(startX - 1, startY);
     s->head->next->next = newNode(startX - 2, startY);
     return s;
@@ -39,17 +40,17 @@ Snake* Snake_Create(int startX, int startY)
  */
 void Snake_Destroy(Snake* s)
 {
-    Node* cur = s->head;
+    Node* cur = s->head;    // 从头删到尾
     while (cur) {
         Node* tmp = cur;
         cur = cur->next;
-        free(tmp);
+        free(tmp);// 释放一节
     }
-    free(s);
+    free(s);// 最后释放蛇对象本身
 }
 
 /**
- * 移动头节点（内部函数）
+ * 只移动头节点（内部函数）
  */
 static void moveHead(Snake* s)
 {
@@ -60,9 +61,9 @@ static void moveHead(Snake* s)
     case DIR_LEFT:  nx--; break;
     case DIR_RIGHT: nx++; break;
     }
-    Node* h = newNode(nx, ny);
-    h->next = s->head;
-    s->head = h;
+    Node* h = newNode(nx, ny);// 新建节点=新头
+    h->next = s->head;// 旧头变成第二节
+    s->head = h;// 更新头指针
 }
 
 /**
@@ -72,16 +73,16 @@ static void moveHead(Snake* s)
  */
 void Snake_Move(Snake* s)
 {
-    moveHead(s);
-    if (!s->growPending) {
+    moveHead(s);        // 1. 先把头往前挪
+    if (!s->growPending) {  // 2. 如果“没吃到食物”
         /* 找到倒数第二节 */
         Node* cur = s->head;
-        while (cur->next->next) cur = cur->next;
-        free(cur->next);
+        while (cur->next->next) cur = cur->next;// 找到倒数第二节
+        free(cur->next);        // 3. 删尾节
         cur->next = NULL;
     }
     else {
-        s->growPending = false; // 完成成长
+        s->growPending = false; // 吃到食物就保留尾节（完成成长）
     }
 }
 

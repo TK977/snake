@@ -229,6 +229,15 @@ GameOverAction StartMultiPlayer(SDL_Renderer* renderer,
     Uint32 gameStart = SDL_GetTicks();
     const Uint32 TIME_LIMIT_MS = 2 * 60 * 1000; // 2 分钟时限
 
+    /* 各自加速状态 */
+    bool boost1 = false, boost2 = false;
+    Uint32 boostEnd1 = 0, boostEnd2 = 0;
+    /* 各自节拍计时 */
+    static Uint32 last1 = 0, last2 = 0;
+    if (last1 == 0) last1 = last;   // 用开局时间初始化
+	if (last2 == 0) last2 = last;                     
+ 
+
     bool d1 = false, d2 = false; // 死亡标志
 
     /* 双人结算数据结构（先占位，后填真实数据） */
@@ -275,10 +284,32 @@ GameOverAction StartMultiPlayer(SDL_Renderer* renderer,
             }
         }
 
-        if (now - last < spd) { SDL_Delay(1); continue; }
-        last = now;
+        /* ===== 1. 先统一拿一次时间戳 ===== */
+        /* ===== 1. 复用本帧已拿到的 now ===== */
 
-        Snake_Move(s1); Snake_Move(s2);
+        /* ===== 2. 各自独立节拍 ===== */
+        bool moved1 = false, moved2 = false;
+
+        /* P1 是否到点 */
+        if (now - last1 >= (boost1 ? 60 : spd)) {
+            Snake_Move(s1);
+            last1 = now;
+            moved1 = true;
+        }
+        /* P2 是否到点 */
+        if (now - last2 >= (boost2 ? 60 : spd)) {
+            Snake_Move(s2);
+            last2 = now;
+            moved2 = true;
+        }
+
+        /* 两条蛇都还没到时间 → 真正让 CPU 休息 */
+        if (!moved1 && !moved2) {
+            SDL_Delay(1);
+            continue;
+        }
+
+        
 
         /* 各种死亡判定 */
         bool wall1 = Snake_WallCollision(s1), self1 = Snake_SelfCollision(s1), hit1 = HitOtherSnake(s1, s2);
@@ -291,8 +322,18 @@ GameOverAction StartMultiPlayer(SDL_Renderer* renderer,
         /* 吃食物 */
         SDL_Point h1 = Snake_HeadGrid(s1), h2 = Snake_HeadGrid(s2);
         bool eat = false;
-        if (h1.x == f.x && h1.y == f.y) { sc1 += (f.type == FOOD_BONUS ? 3 : 1); Snake_Grow(s1); eat = true; }
-        if (h2.x == f.x && h2.y == f.y) { sc2 += (f.type == FOOD_BONUS ? 3 : 1); Snake_Grow(s2); eat = true; }
+        if (h1.x == f.x && h1.y == f.y) {
+            sc1 += (f.type == FOOD_BONUS ? 3 : 1); 
+            Snake_Grow(s1); 
+            eat = true;
+            if (f.type == FOOD_SPEED) { boost1 = true; boostEnd1 = now + 5000; }
+        }
+        if (h2.x == f.x && h2.y == f.y) { 
+            sc2 += (f.type == FOOD_BONUS ? 3 : 1); 
+            Snake_Grow(s2); 
+            eat = true; 
+            if (f.type == FOOD_SPEED) { boost2 = true; boostEnd2 = now + 5000; }
+        }
         if (eat) f = newFood(s1);
 
         /* 双蛇渲染 */
@@ -339,6 +380,9 @@ GameOverAction StartMultiPlayer(SDL_Renderer* renderer,
         SDL_DestroySurface(surf);
 
         SDL_RenderPresent(renderer);
+        /* 自动关加速 */
+        if (boost1 && now > boostEnd1) boost1 = false;
+        if (boost2 && now > boostEnd2) boost2 = false;
     }
 
     /* 结算数据 */

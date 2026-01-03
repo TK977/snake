@@ -32,9 +32,9 @@ typedef struct {
 
 /* 对外接口 */
 Snake* Snake_Create(int startX, int startY);   // 创建初始 3 节蛇
-void   Snake_Destroy(Snake* s);               // 释放内存
-void   Snake_Move(Snake* s);                  // 移动一格
-void   Snake_Grow(Snake* s);                  // 请求成长
+void   Snake_Destroy(Snake* s);               // 释放整条链表
+void   Snake_Move(Snake* s);                  // 走一步（头插+尾删）
+void   Snake_Grow(Snake* s);                  // 登记“下一回合要长”
 bool   Snake_SelfCollision(const Snake* s);   // 自撞
 bool   Snake_WallCollision(const Snake* s);   // 撞墙
 SDL_Point Snake_HeadGrid(const Snake* s);     // 获取头节点坐标
